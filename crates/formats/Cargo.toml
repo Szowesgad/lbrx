@@ -21,7 +21,7 @@ safetensors = { workspace = true, optional = true }
 
 # I/O utilities
 tokio = { version = "1.32", features = ["fs", "io-util"], optional = true }
-async-compression = { version = "0.4", features = ["zstd", "snap"], optional = true }
+async-compression = { version = "0.4", optional = true }
 zstd = "0.13"
 snap = "1.1"
 bincode = "1.3"
