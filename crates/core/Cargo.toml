@@ -1,0 +1,40 @@
+[package]
+name = "lbrx-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["LibraxisAI Team"]
+description = "Core tensor operations and memory management for LBRX-MLX"
+repository = "https://github.com/LibraxisAI/lbrx-mlx"
+license = "MIT"
+keywords = ["tensor", "memory", "machine-learning"]
+
+[dependencies]
+# Core utilities
+bytemuck = { workspace = true }
+half = { workspace = true }
+rayon = { workspace = true }
+num-traits = { workspace = true }
+thiserror = { workspace = true }
+
+# Metal integration (optional)
+metal = { workspace = true, optional = true }
+objc = { workspace = true, optional = true }
+core-foundation = { workspace = true, optional = true }
+foreign-types = { workspace = true, optional = true }
+
+# Memory management
+memmap2 = { workspace = true }
+crossbeam = "0.8"
+parking_lot = "0.12"
+
+# Logging and error handling
+log = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+proptest = { workspace = true }
+mockall = { workspace = true }
+
+[features]
+default = ["metal-backend"]
+metal-backend = ["metal", "objc", "core-foundation", "foreign-types"]

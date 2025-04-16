@@ -1,0 +1,43 @@
+[package]
+name = "lbrx-metal"
+version = "0.1.0"
+edition = "2021"
+authors = ["LibraxisAI Team"]
+description = "Metal acceleration for LBRX-MLX"
+repository = "https://github.com/LibraxisAI/lbrx-mlx"
+license = "MIT"
+keywords = ["metal", "gpu", "acceleration", "apple-silicon"]
+
+[dependencies]
+# Core dependencies
+lbrx-core = { path = "../core", features = ["metal-backend"] }
+
+# Metal integration
+metal = { workspace = true }
+objc = { workspace = true }
+block = { workspace = true }
+core-foundation = { workspace = true }
+foreign-types = { workspace = true }
+
+# Memory handling 
+bytemuck = { workspace = true }
+half = { workspace = true }
+
+# Utilities
+thiserror = { workspace = true }
+lazy_static = "1.4"
+parking_lot = "0.12"
+
+# Logging
+log = { workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+mockall = { workspace = true }
+
+[build-dependencies]
+metal-shaders = { path = "shaders" }
+
+[features]
+default = []
+profile = []

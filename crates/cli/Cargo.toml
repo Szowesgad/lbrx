@@ -1,0 +1,47 @@
+[package]
+name = "lbrx-cli"
+version = "0.1.0"
+edition = "2021"
+authors = ["LibraxisAI Team"]
+description = "Command line interface for LBRX-MLX"
+repository = "https://github.com/LibraxisAI/lbrx-mlx"
+license = "MIT"
+keywords = ["cli", "command-line", "model-conversion"]
+
+[dependencies]
+# Core dependencies
+lbrx-core = { path = "../core" }
+lbrx-formats = { path = "../formats" }
+lbrx-metal = { path = "../metal" }
+
+# CLI utilities
+clap = { workspace = true }
+indicatif = { workspace = true }
+console = { workspace = true }
+dialoguer = { workspace = true }
+crossterm = "0.27"
+
+# Config and formatting
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+
+# Logging and error handling
+log = { workspace = true }
+env_logger = { workspace = true }
+thiserror = { workspace = true }
+
+# Utilities
+humansize = "2.1"
+chrono = "0.4"
+dirs = "5.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+predicates = "3.0"
+tempfile = "3.8"
+
+[[bin]]
+name = "lbrx"
+path = "src/main.rs"
