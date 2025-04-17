@@ -1,0 +1,24 @@
+{
+  "name": "Rust Development Container",
+  "image": "mcr.microsoft.com/devcontainers/rust:1-ubuntu-22.04",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/rust:1": {
+      "version": "stable"
+    }
+  },
+  "postCreateCommand": "cargo install cargo-watch && cargo install clippy && cargo build",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "serayuzgur.crates",
+        "vadimcn.vscode-lldb"
+      ]
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=${localEnv:HOME}/.cargo,target=/usr/local/cargo,type=bind"
+  ]
+}
