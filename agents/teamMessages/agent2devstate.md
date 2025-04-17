@@ -1,51 +1,45 @@
-# Agent 2 Status Update (Internal)
+# Agent 2 Status Update - Faza 2 (Internal)
 
-**Siemka Ekipa (Orchestrator, Agent 1, Agent 3),**
+**Do:** Orchestrator, Agent 1, Agent 3
+**Z:** Agent 2 (Formaty)
+**Re:** Update po mergu, odpowiedzi i kolejne kroki
 
-Krótki update ode mnie (Agent 2) z frontu konwersji formatów:
+---
 
-**Co zrobiłem:**
+Siemka ponownie!
 
-*   **Podstawa pod formaty:** Mamy `src/formats/traits.rs` z traitami `ModelReader` i `ModelWriter`. To nasza baza do dalszej pracy.
-*   **SafeTensors Reader:** Zacząłem implementację w `src/formats/safetensors/reader.rs`. Mamy `StreamingSafeTensorsReader`:
-    *   Czyta header SafeTensors (JSON).
-    *   Obsługuje `mmap` (memory mapping) - tu na razie z placeholderem tensora, który *kopiuje* dane, więc zero-copy jeszcze nie ma, ale struktura jest.
-    *   Obsługuje streaming bez `mmap` - użyłem `RefCell` wokół `File`, żeby dało się robić `seek` w metodzie `get_tensor` (która z definicji traita bierze `&self`). Działa, ale nie wiem, czy to optymalne na dłuższą metę.
-    *   Dodałem `thiserror` dla lepszego ogarniania błędów (`SafeTensorError`).
-*   **Struktury:** W `reader.rs` są na razie **placeholdery** dla `Tensor` i `DType`. Czekam tu na konkrety od Agenta 1.
+Przeczytałem Wasze statusy - dzięki za update!
 
-**Na jakim etapie jestem:**
+**Co zrobiłem (podsumowanie z poprzedniego raportu):**
 
-*   Plan z `agent2.md` na Dzień 1:
-    *   Godziny 1-2 (Interfejsy): **Zrobione.**
-    *   Godziny 3-4 (SafeTensors): **W trakcie.** Reader jest zaczęty, writer jeszcze nie.
-*   Dyrrektywy Orchestratora:
-    *   Traity: **Zrobione.**
-    *   Priorytet SafeTensors/GGUF: **Częściowo.** SafeTensors reader zaczęty, GGUF nietknięty.
-    *   Streaming: **Częściowo.** Design jest, implementacja w SafeTensors readerze działa koncepcyjnie, ale wymaga dopracowania i testów.
-    *   Metadata: **Częściowo.** Reader czyta, traity wspierają, ale pełny cykl wymaga writera.
+*   Zdefiniowałem traity `ModelReader`/`ModelWriter` (`src/formats/traits.rs`).
+*   Zaimplementowałem **`StreamingSafeTensorsReader`** (`src/formats/safetensors/reader.rs`):
+    *   Obsługuje mmap i streaming (z `RefCell<File>`).
+    *   Ma podstawowe parsowanie headera i metadanych.
+    *   Używa `thiserror` do błędów.
+    *   **Używa placeholderów dla Tensor/DType.**
 
-**Czego jestem pewien:**
+**Odpowiedzi / Rozwiane wątpliwości (na podstawie Waszych raportów):**
 
-*   Struktura modułów dla formatów jest na miejscu.
-*   Podstawowe flow czytania headera SafeTensors działa.
-*   Logika przełączania między mmap / streaming jest zaimplementowana.
-*   Error handling jest czytelniejszy dzięki `thiserror`.
+*   **Integracja z Agentem 1:** Super, że `Tensor` z `lbrx-core` jest gotowy i wspiera **memory-mapped storage** oraz **views dla zero-copy**! To kluczowe dla mojego `StreamingSafeTensorsReader`. Muszę teraz zaktualizować implementację, żeby używała `lbrx-core::Tensor` zamiast placeholderów i wykorzystała widoki przy mmap.
+*   **Streaming bez mmap (`RefCell<File>`):** Agent 1 wspomniał o Rayonie w `lbrx-core`. Muszę sprawdzić, czy moje podejście z `RefCell` nie będzie kolidować z potencjalnym równoległym czytaniem/zapisem tensorów w `ConversionPipeline`. Może potrzebne będzie inne rozwiązanie (np. przekazywanie ścieżki i otwieranie pliku na żądanie w każdej operacji `get_tensor` bez mmap, albo synchronizacja).
+*   **Format dla Metal (pytanie Agenta 3):** Na razie skupiam się na wiernym odczycie/zapisie formatów źródłowych (głównie F32, F16, BF16). Jeśli chodzi o *wejście* do kerneli Metal, to **F16** wydaje się najbardziej sensownym domyślnym typem do optymalizacji. Kwantyzacja (np. do INT8) powinna być opcjonalnym krokiem w `ConversionPipeline`, jeśli użytkownik sobie zażyczy. Daj znać Agent 3, czy to wystarczy na start.
+*   **Interfejs konwersji typów (pytanie Agenta 3):** Jak najbardziej! Jak będę miał zaimplementowane GGUF (który ma dużo typów kwantyzacji), będziemy mogli ustalić wspólny interfejs konwersji między `DType` z `lbrx-core` a specyficznymi typami formatów.
 
-**Czego NIE jestem pewien / Co mnie martwi:**
+**Co mnie nadal martwi:**
 
-*   **Integracja z Agentem 1:** Kluczowa sprawa - jak dokładnie będzie wyglądał `Tensor` Agenta 1? Moje obecne placeholdery (`Tensor::from_slice`, `Tensor::from_vec`) są bardzo proste. Szczególnie `from_slice` dla mmap musi być zrobiony tak, żeby faktycznie unikać kopiowania danych.
-*   **Streaming bez mmap:** Rozwiązanie z `RefCell<File>` działa, ale czy nie będzie wąskim gardłem albo nie spowoduje problemów z współbieżnością, jeśli będziemy chcieli zrównoleglić czytanie tensorów (co jest w planach)? Może trzeba będzie inaczej podejść do `ModelReader::get_tensor` albo znaleźć inny sposób na zarządzanie plikiem.
-*   **Performance:** Na razie nie mam pojęcia, jak to działa pod kątem wydajności. Benchmarki dopiero przed nami.
-*   **Kompletność SafeTensors:** Reader wymaga jeszcze dopieszczenia (np. mapowanie błędów z `Tensor::from_...`) i testów.
+*   Potencjalne problemy z `RefCell` przy współbieżności (jak wyżej).
+*   Wydajność – brak benchmarków.
 
-**Dalsze kroki:**
+**Plan kolejnych kroków (zaktualizowany):**
 
-1.  **Implementacja `SafeTensorsWriter`:** Dokończę obsługę SafeTensors (zapis).
-2.  **Implementacja `GGUFReader`:** Zgodnie z priorytetami od Orchestratora.
-3.  **Integracja z Agentem 1:** Jak tylko dostanę finalną strukturę `Tensor`.
-4.  **Testy:** Trzeba będzie napisać testy jednostkowe i integracyjne dla konwersji.
+1.  **Integracja `lbrx-core`:** Zrefaktoryzować `StreamingSafeTensorsReader`, żeby używał `lbrx-core::Tensor` i `lbrx-core::DType`, wykorzystując widoki dla mmap zero-copy.
+2.  **Implementacja `SafeTensorsWriter`:** Dokończyć obsługę SafeTensors, uwzględniając zapis tensorów z `lbrx-core` i metadanych.
+3.  **Implementacja `GGUFReader`:** Zgodnie z priorytetami (Orchestrator, `agent2.md`).
+4.  **Review kodu Agenta 1:** Jak tylko zintegruję `lbrx-core`, spojrzę na kod.
+5.  **Testy:** Dodać testy jednostkowe dla SafeTensors read/write.
+6.  **Konsultacje z Agentem 3:** Ustalenie szczegółów konwersji typów dla Metal.
 
-Trzymajcie kciuki! Dajcie znać, jak macie jakieś uwagi.
+Lecimy dalej! Dajcie znać, co myślicie.
 
 Agent 2 
