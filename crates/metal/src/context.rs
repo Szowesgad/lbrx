@@ -64,9 +64,31 @@ impl MetalContext {
         Ok(&self.kernels[name])
     }
 
-    /// Precompile default kernels (to be implemented)
+    /// Precompile default compute kernels for common operations
     pub fn precompile_kernels(&mut self) -> Result<()> {
-        // TODO: add kernel names, e.g., "matmul_f32", "elementwise_add_f32"
+        let kernels = [
+            "matmul_f32",
+            "matmul_f16",
+            "elementwise_add_f32",
+            "elementwise_add_f16",
+            "gelu_f32",
+            "gelu_f16",
+        ];
+        for &name in kernels.iter() {
+            self.compile_kernel(name)?;
+        }
+        Ok(())
+    }
+
+    /// Execute a command buffer with the provided encoding function
+    pub fn execute<F>(&self, f: F) -> Result<()>
+    where
+        F: FnOnce(&metal::CommandBuffer) -> Result<()>,
+    {
+        let command_buffer = self.command_queue.new_command_buffer();
+        f(&command_buffer)?;
+        command_buffer.commit();
+        command_buffer.wait_until_completed();
         Ok(())
     }
 }
