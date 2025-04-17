@@ -1,5 +1,5 @@
 [package]
-name = "lbrx-mlx"
+name = "mergekit-rs"
 version = "0.1.0"
 edition = "2021"
 authors = ["LibraxisAI Team"]
@@ -21,13 +21,14 @@ members = [
 
 [workspace.dependencies]
 # Core utilities
-bytemuck = { version = "1.14", features = ["derive"] }
+# bytemuck = { version = "1.14", features = ["derive"] }
 half = { version = "2.3", features = ["use-intrinsics", "std"] }
 memmap2 = "0.9"
-rayon = "1.8"
-num-traits = "0.2"
-thiserror = "1.0"
-safetensors = "0.4"
+# bincode = "1.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+# snap = "1.1"
+# zstd = "0.13"
 
 # Metal bindings
 metal = "0.27"
@@ -50,15 +51,35 @@ proptest = "1.3"
 mockall = "0.12"
 
 [dependencies]
+# Core dependencies from agent2.md
+# bytemuck = "1.14"               # Zero-cost casting between data types - Not used directly in reader yet
+memmap2 = "0.9"                 # Memory mapping for huge files
+# bincode = "1.3"                 # Binary serialization - Not used directly in reader yet
+serde = { version = "1.0", features = ["derive"] }  # Serialization framework
+serde_json = "1.0"              # JSON serialization
+# snap = "1.1"                    # Snappy compression - Not used directly in reader yet
+# zstd = "0.13"                   # Zstandard compression - Not used directly in reader yet
+
+# Format-specific (add more as needed)
+# safetensors = "0.4"             # SafeTensors support - Using own parsing logic for now
+# gguf = "0.1"                    # GGUF support (custom or community crate)
+# half = { version = "2.3", features = ["use-intrinsics", "std"] }  # Half-precision floats - Needed for Tensor impl
+
+# Utilities
+thiserror = "1.0"               # Error handling
+log = "0.4"                     # Logging facade - Not used directly in reader yet
+# rayon = "1.8"                   # Parallelism - Not used directly in reader yet
+# indicatif = "0.17"              # Progress bars - Not used directly in reader yet
+
 lbrx-core = { path = "crates/core" }
 lbrx-formats = { path = "crates/formats" }
 lbrx-metal = { path = "crates/metal" }
 lbrx-cli = { path = "crates/cli" }
 
 # Re-export workspace dependencies for the main crate
-bytemuck.workspace = true
+# bytemuck.workspace = true
 half.workspace = true
-rayon.workspace = true
+# rayon.workspace = true
 thiserror.workspace = true
 clap.workspace = true
 log.workspace = true
@@ -106,3 +127,7 @@ gguf = ["lbrx-formats/gguf"]
 mlx = ["lbrx-formats/mlx"]
 huggingface = ["lbrx-formats/huggingface"]
 all-formats = ["safetensors", "gguf", "mlx", "huggingface"]
+
+[lib]
+name = "mergekit_rs_lib" # Specify library name
+path = "src/lib.rs"    # Specify library entry point

@@ -1,147 +1,147 @@
 # LBRX-MLX / MergeKit-RS
 
-> Ultraszybki toolkit do manipulacji modelami LLM dla Apple Silicon w języku Rust
+> Ultra-fast LLM model manipulation toolkit for Apple Silicon written in Rust
 
-LBRX-MLX to wysokowydajne, napisane w Rust narzędzie zaprojektowane specjalnie pod kątem Apple Silicon, które zapewnia 50x wydajniejszą konwersję, kwantyzację i merging modeli językowych niż tradycyjne narzędzia Python. Wykorzystuje bezpośredni dostęp do Metal API oraz zaawansowane zarządzanie pamięcią do maksymalnego wykorzystania potencjału chipów M1/M2/M3.
+LBRX-MLX is a high-performance Rust toolkit specifically designed for Apple Silicon, providing 50x more efficient conversion, quantization, and merging of language models compared to traditional Python tools. It leverages direct access to the Metal API and advanced memory management to maximize the potential of M1/M2/M3 chips.
 
-## 🚀 Funkcjonalności
+## 🚀 Features
 
-- ⚡️ Ultra-szybka konwersja formatów modeli (5-10x szybsza niż Python)
-- 🧠 Zaawansowana kwantyzacja z minimalnymi stratami jakości
-- 🔄 Merging modeli z optymalnym wykorzystaniem pamięci
-- 🏎️ Dedykowana optymalizacja dla Metal API
-- 📦 Jednoplikowy binarny program (bez zależności)
+- ⚡️ Ultra-fast model format conversion (5-10x faster than Python)
+- 🧠 Advanced quantization with minimal quality loss
+- 🔄 Model merging with optimal memory utilization
+- 🏎️ Dedicated optimization for Metal API
+- 📦 Single binary executable (no dependencies)
 
-## 📋 Roadmapa
+## 📋 Roadmap
 
-### Etap 1: Fundamenty (Agent 1)
+### Phase 1: Foundations (Agent 1)
 
-- [ ] Implementacja core tensor library
-  - [ ] Podstawowa struktura Tensor
-  - [ ] Operacje elementwise
-  - [ ] Operacje macierzowe
+- [ ] Core tensor library implementation
+  - [ ] Basic Tensor structure
+  - [ ] Elementwise operations
+  - [ ] Matrix operations
   - [ ] BLAS/LAPACK bindings
-- [ ] System zarządzania pamięcią
+- [ ] Memory management system
   - [ ] Memory pool
   - [ ] Memory-mapped storage
   - [ ] Zero-copy sharing
-- [ ] Infrastruktura wielowątkowości
+- [ ] Multithreading infrastructure
   - [ ] Thread pool
   - [ ] Work stealing scheduler
   - [ ] Data-parallel primitives
 
-### Etap 2: Konwersja formatów (Agent 2)
+### Phase 2: Format Conversion (Agent 2)
 
-- [ ] Obsługa standardowych formatów
+- [ ] Standard format support
   - [ ] SafeTensors (read/write)
   - [ ] GGUF (read/write)
   - [ ] HuggingFace (read)
   - [ ] MLX (read/write)
 - [ ] Streaming conversion
-  - [ ] Przetwarzanie bez ładowania całego modelu
-  - [ ] Progresywna konwersja
-  - [ ] Monitorowanie procesu
-- [ ] Format detection i validation
-  - [ ] Automatyczne wykrywanie typu
-  - [ ] Walidacja metadanych
-  - [ ] Naprawa uszkodzonych plików
+  - [ ] Processing without loading the entire model
+  - [ ] Progressive conversion
+  - [ ] Process monitoring
+- [ ] Format detection and validation
+  - [ ] Automatic type detection
+  - [ ] Metadata validation
+  - [ ] Corrupted file repair
 
-### Etap 3: Optymalizacja Metal (Agent 3)
+### Phase 3: Metal Optimization (Agent 3)
 
-- [ ] Kernele Metal
+- [ ] Metal kernels
   - [ ] Matmul kernels
   - [ ] Activation functions
   - [ ] Attention mechanism
 - [ ] Kernel fusion
-  - [ ] Pattern-matching dla kernel fusion
-  - [ ] Auto-tuning kerneli
+  - [ ] Pattern-matching for kernel fusion
+  - [ ] Auto-tuning kernels
   - [ ] Kernel scheduling
-- [ ] Zarządzanie pamięcią GPU
+- [ ] GPU memory management
   - [ ] Buffer pooling
   - [ ] Texture caching
   - [ ] Zero-copy CPU-GPU 
 
-### Etap 4: Zaawansowane funkcje
+### Phase 4: Advanced Features
 
 - [ ] Model merging
   - [ ] SLERP interpolation
   - [ ] Task vectors
-  - [ ] Liniowa interpolacja
-- [ ] Kwantyzacja
-  - [ ] Dynamiczna kwantyzacja
-  - [ ] Mieszane precision (mixed_2_6, mixed_3_6, mixed_4_8)
-  - [ ] Strategia selektywnej kwantyzacji
+  - [ ] Linear interpolation
+- [ ] Quantization
+  - [ ] Dynamic quantization
+  - [ ] Mixed precision (mixed_2_6, mixed_3_6, mixed_4_8)
+  - [ ] Selective quantization strategy
 - [ ] Fine-tuning
-  - [ ] LoRA implementacja
-  - [ ] QLoRA implementacja
-  - [ ] DoRA implementacja
+  - [ ] LoRA implementation
+  - [ ] QLoRA implementation
+  - [ ] DoRA implementation
 
-### Etap 5: Interfejsy
+### Phase 5: Interfaces
 
 - [ ] CLI
-  - [ ] Interaktywny interfejs wiersza poleceń
-  - [ ] Zestaw narzędzi diagnostycznych
-  - [ ] Generowanie skryptów
+  - [ ] Interactive command line interface
+  - [ ] Diagnostic toolset
+  - [ ] Script generation
 - [ ] API
-  - [ ] C API dla integracji
+  - [ ] C API for integration
   - [ ] Python bindings
-  - [ ] Integracja z ekosystemem MLX
+  - [ ] Integration with MLX ecosystem
 
-## 🔧 Technologie
+## 🔧 Technologies
 
-- **[Rust](https://www.rust-lang.org/)**: Język zapewniający bezpieczeństwo pamięci i wydajność na poziomie C/C++
-- **[Metal API](https://developer.apple.com/metal/)**: Bezpośredni dostęp do Apple GPU
-- **[rayon](https://github.com/rayon-rs/rayon)**: Wysokowydajna biblioteka do przetwarzania równoległego
-- **[safetensors-rs](https://github.com/huggingface/safetensors)**: Obsługa formatu SafeTensors
+- **[Rust](https://www.rust-lang.org/)**: Language providing memory safety with C/C++-level performance
+- **[Metal API](https://developer.apple.com/metal/)**: Direct access to Apple GPU
+- **[rayon](https://github.com/rayon-rs/rayon)**: High-performance library for parallel processing
+- **[safetensors-rs](https://github.com/huggingface/safetensors)**: SafeTensors format handling
 
-## 🏛️ Architektura
+## 🏛️ Architecture
 
 ```
 lbrx-mlx/
-├── core/               # Fundamentalne struktury danych
-│   ├── tensor/         # Implementacja tensora
-│   ├── memory/         # Zarządzanie pamięcią
-│   └── parallel/       # Primitives równoległości
-├── formats/            # Konwersja formatów
-│   ├── safetensors/    # Obsługa SafeTensors
-│   ├── gguf/           # Obsługa GGUF
-│   └── mlx/            # Obsługa MLX
+├── core/               # Fundamental data structures
+│   ├── tensor/         # Tensor implementation
+│   ├── memory/         # Memory management
+│   └── parallel/       # Parallelism primitives
+├── formats/            # Format conversion
+│   ├── safetensors/    # SafeTensors support
+│   ├── gguf/           # GGUF support
+│   └── mlx/            # MLX support
 ├── metal/              # Metal accelerations
 │   ├── kernels/        # Compute kernels
 │   ├── pipeline/       # Pipeline stages
 │   └── scheduler/      # Kernel scheduler
-└── cli/                # Interfejs użytkownika
-    ├── commands/       # Implementacje komend
-    └── formatters/     # Formatowanie wyjścia
+└── cli/                # User interface
+    ├── commands/       # Command implementations
+    └── formatters/     # Output formatting
 ```
 
-## 📊 Porównanie wydajności
+## 📊 Performance Comparison
 
-| Operacja | Python/MLX | LBRX-MLX | Przyspieszenie |
+| Operation | Python/MLX | LBRX-MLX | Speedup |
 |----------|------------|----------|----------------|
-| Konwersja 7B modelu | 45 min | 5 min | 9x |
-| Kwantyzacja 70B modelu | 3.5h | 25 min | 8.4x |
-| Merging 2x 13B modeli | 2h | 15 min | 8x |
-| Pamięć przy 70B modelu | 140GB | 60GB | 2.3x mniej |
+| 7B model conversion | 45 min | 5 min | 9x |
+| 70B model quantization | 3.5h | 25 min | 8.4x |
+| Merging 2x 13B models | 2h | 15 min | 8x |
+| Memory for 70B model | 140GB | 60GB | 2.3x less |
 
-## 🔜 Następne kroki
+## 🔜 Next Steps
 
-1. Implementacja core tensor operations
-2. Dodanie obsługi SafeTensors
-3. Podstawowe Metal kernels
-4. CLI z komendami konwersji
+1. Implement core tensor operations
+2. Add SafeTensors support
+3. Basic Metal kernels
+4. CLI with conversion commands
 
-## 🤝 Kontrybutorzy
+## 🤝 Contributors
 
 - Agent 1: Core Tensor Operations & Memory
 - Agent 2: Format Conversions
 - Agent 3: Metal Optimizations
 - Orchestrator: Project Coordination
 
-## 📝 Licencja
+## 📝 License
 
-Ten projekt jest udostępniany na licencji MIT - zobacz plik [LICENSE](LICENSE) aby poznać szczegóły.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-*Projekt realizowany we współpracy z Claude 3.5 Sonnet, stan na 16 kwietnia 2025*# lbrx
+*Project developed in collaboration with Claude 3.5 Sonnet, as of April 16, 2025*
