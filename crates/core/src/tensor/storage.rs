@@ -28,7 +28,7 @@ pub enum TensorStorage<T: DataType> {
 #[derive(Debug, Clone)]
 pub struct CpuStorage<T: DataType> {
     /// Buffer for the data
-    buffer: std::sync::Arc<Buffer>,
+    buffer: std::sync::Arc<parking_lot::RwLock<Buffer>>,
     
     /// Phantom data for type T
     _marker: std::marker::PhantomData<T>,
@@ -39,14 +39,14 @@ impl<T: DataType> CpuStorage<T> {
     pub fn new(num_elements: usize) -> Result<Self> {
         if num_elements == 0 {
             return Ok(Self {
-                buffer: std::sync::Arc::new(Buffer::new(0)?),
+                buffer: std::sync::Arc::new(parking_lot::RwLock::new(Buffer::new(0)?)),
                 _marker: std::marker::PhantomData,
             });
         }
         
         let size = num_elements * std::mem::size_of::<T>();
         let options = AllocOptions::default().with_alignment(64);
-        let buffer = Buffer::with_options(size, options)?;
+        let mut buffer = Buffer::with_options(size, options)?;
         
         // Initialize to zero
         unsafe {
@@ -54,44 +54,66 @@ impl<T: DataType> CpuStorage<T> {
         }
         
         Ok(Self {
-            buffer: std::sync::Arc::new(buffer),
+            buffer: std::sync::Arc::new(parking_lot::RwLock::new(buffer)),
             _marker: std::marker::PhantomData,
         })
     }
     
     /// Returns a slice to the data.
-    pub fn as_slice(&self) -> &[T] {
-        let ptr = self.buffer.as_ptr() as *const T;
-        let len = self.buffer.size() / std::mem::size_of::<T>();
+    pub fn as_slice(&self) -> Vec<T> {
+        let buffer = self.buffer.read();
+        let ptr = buffer.as_ptr() as *const T;
+        let len = buffer.size() / std::mem::size_of::<T>();
         
         unsafe {
-            std::slice::from_raw_parts(ptr, len)
+            std::slice::from_raw_parts(ptr, len).to_vec()
         }
     }
     
     /// Returns a mutable slice to the data.
-    pub fn as_mut_slice(&mut self) -> &mut [T] {
-        let ptr = std::sync::Arc::get_mut(&mut self.buffer)
-            .expect("Cannot get mutable reference to shared buffer")
-            .as_mut_ptr() as *mut T;
-        let len = self.buffer.size() / std::mem::size_of::<T>();
+    /// This now returns a cloned slice for thread safety
+    pub fn as_mut_slice(&mut self) -> Vec<T> {
+        let buffer = self.buffer.read();
+        let ptr = buffer.as_ptr() as *const T;
+        let len = buffer.size() / std::mem::size_of::<T>();
         
         unsafe {
-            std::slice::from_raw_parts_mut(ptr, len)
+            std::slice::from_raw_parts(ptr, len).to_vec()
         }
+    }
+    
+    /// Updates the buffer content with the given slice
+    pub fn update_from_slice(&self, data: &[T]) -> Result<()> {
+        let mut buffer = self.buffer.write();
+        let len = buffer.size() / std::mem::size_of::<T>();
+        
+        if data.len() != len {
+            return Err(Error::ShapeMismatch {
+                expected: len,
+                actual: data.len(),
+            });
+        }
+        
+        let dst_ptr = buffer.as_mut_ptr() as *mut T;
+        unsafe {
+            let dst_slice = std::slice::from_raw_parts_mut(dst_ptr, len);
+            dst_slice.copy_from_slice(data);
+        }
+        
+        Ok(())
     }
     
     /// Returns the number of elements in the storage.
     pub fn num_elements(&self) -> usize {
-        self.buffer.size() / std::mem::size_of::<T>()
+        self.buffer.read().size() / std::mem::size_of::<T>()
     }
     
     /// Creates a storage from an existing slice of data.
     pub fn from_slice(data: &[T]) -> Result<Self> {
         let num_elements = data.len();
-        let mut storage = Self::new(num_elements)?;
+        let storage = Self::new(num_elements)?;
         
-        storage.as_mut_slice().copy_from_slice(data);
+        storage.update_from_slice(data)?;
         
         Ok(storage)
     }
